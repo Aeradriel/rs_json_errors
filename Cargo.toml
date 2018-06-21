@@ -1,7 +1,9 @@
 [package]
 name = "diesel_errors"
+description = "Diesel error management for rocket apps"
 version = "0.1.0"
 authors = ["Thibaut Roche <thibaut.roche.perso@gmail.com>"]
+repository = "https://github.com/Aeradriel/rs_diesel_errors.git"
 
 [dependencies]
 rocket = "0.3.12"
