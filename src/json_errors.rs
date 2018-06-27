@@ -73,14 +73,14 @@ impl<'b> From<&'b diesel::result::Error> for JsonError {
                     Status::UnprocessableEntity,
                 ),
                 _ => (
-                    None,
-                    String::from("during a database transaction"),
+                    Some(String::from("Database error: ")),
+                    format!("{:?}", err),
                     Status::InternalServerError,
                 ),
             },
             NotFound => (None, String::from("Not found"), Status::NotFound),
             err => (
-                Some(String::from("Database error")),
+                Some(String::from("Database error: ")),
                 format!("{:?}", err),
                 Status::InternalServerError,
             ),
@@ -110,7 +110,7 @@ fn column_from_database_error_infos(
     infos: &Box<DatabaseErrorInformation + Send + Sync>,
 ) -> Option<String> {
     if let Some(column) = infos.column_name() {
-        Some(String::from(column))
+        return Some(String::from(column));
     } else if let Some(constraint) = infos.constraint_name() {
         let mut origin = String::from(constraint);
 
@@ -119,7 +119,7 @@ fn column_from_database_error_infos(
                 origin = String::from(regex.replace(constraint, "$1"));
             }
         }
-        Some(origin)
+        return Some(origin);
     }
     None
 }
