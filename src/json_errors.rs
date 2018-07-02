@@ -7,8 +7,9 @@ use rocket::http::Status;
 use rocket::request::Request;
 use rocket::response::{self, Responder};
 use rocket_contrib::Json;
+use serde_json::Value;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct JsonErrors(pub Vec<JsonError>, pub Status);
 
 impl<'r> Responder<'r> for JsonErrors {
@@ -21,23 +22,23 @@ impl<'r> Responder<'r> for JsonErrors {
 
         let errors_description = vec_errors.join("\n");
 
-        let body = Json(json!({
+        let body = json!({
             "error": errors_description,
             "errors": vec_errors
-        }));
+        });
 
-        let mut res = body.respond_to(req).unwrap();
+        let mut res = Json(body).respond_to(req).unwrap();
         res.set_status(self.1);
         res.set_header(ContentType::JSON);
         Ok(res)
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct JsonError {
     status: Status,
     description: String,
-    body: Json,
+    body: Value,
 }
 
 impl JsonError {
@@ -45,7 +46,7 @@ impl JsonError {
         JsonError {
             status,
             description: String::from(description),
-            body: Json(json!({ "error": description.to_string() })),
+            body: json!({ "error": description.to_string() }),
         }
     }
 }
@@ -99,7 +100,7 @@ impl<'b> From<&'b diesel::result::Error> for JsonError {
 
 impl<'r> Responder<'r> for JsonError {
     fn respond_to(self, req: &Request) -> response::Result<'r> {
-        let mut res = self.body.respond_to(req).unwrap();
+        let mut res = Json(self.body).respond_to(req).unwrap();
         res.set_status(self.status);
         res.set_header(ContentType::JSON);
         Ok(res)
