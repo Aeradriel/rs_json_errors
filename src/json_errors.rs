@@ -1,6 +1,3 @@
-use diesel::result::{
-    DatabaseErrorInformation, DatabaseErrorKind, Error::DatabaseError, Error::NotFound,
-};
 use regex::Regex;
 use rocket::http::ContentType;
 use rocket::http::Status;
@@ -59,45 +56,6 @@ impl<'b> From<JsonError> for JsonErrors {
     }
 }
 
-impl<'b> From<&'b diesel::result::Error> for JsonError {
-    fn from(err: &'b diesel::result::Error) -> JsonError {
-        let ocs = match err {
-            DatabaseError(kind, infos) => match kind {
-                DatabaseErrorKind::UniqueViolation => (
-                    column_from_database_error_infos(infos),
-                    String::from("already exists"),
-                    Status::UnprocessableEntity,
-                ),
-                DatabaseErrorKind::ForeignKeyViolation => (
-                    column_from_database_error_infos(infos),
-                    String::from("violates foreign key"),
-                    Status::UnprocessableEntity,
-                ),
-                _ => (
-                    Some(String::from("Database error: ")),
-                    format!("{:?}", err),
-                    Status::InternalServerError,
-                ),
-            },
-            NotFound => (None, String::from("Not found"), Status::NotFound),
-            err => (
-                Some(String::from("Database error: ")),
-                format!("{:?}", err),
-                Status::InternalServerError,
-            ),
-        };
-
-        let mut error = vec![];
-
-        if let Some(origin) = ocs.0 {
-            error.push(origin);
-        }
-        error.push(ocs.1);
-
-        JsonError::new(ocs.2, &error.join(" "))
-    }
-}
-
 impl<'r> Responder<'r> for JsonError {
     fn respond_to(self, req: &Request) -> response::Result<'r> {
         let mut res = Json(self.body).respond_to(req).unwrap();
@@ -107,42 +65,92 @@ impl<'r> Responder<'r> for JsonError {
     }
 }
 
-fn column_from_database_error_infos(
-    infos: &Box<DatabaseErrorInformation + Send + Sync>,
-) -> Option<String> {
-    if let Some(column) = infos.column_name() {
-        return Some(String::from(column));
-    } else if let Some(constraint) = infos.constraint_name() {
-        let mut origin = String::from(constraint);
+mod diesel {
+    use super::*;
+    use diesel::result::{
+        DatabaseErrorInformation, DatabaseErrorKind, Error::DatabaseError, Error::NotFound,
+    };
 
-        if let Some(table_name) = infos.table_name() {
-            if let Ok(regex) = Regex::new(&format!(r"{}_(.+)_key", table_name)) {
-                origin = String::from(regex.replace(constraint, "$1"));
+    impl<'b> From<&'b ::diesel::result::Error> for JsonError {
+        fn from(err: &'b ::diesel::result::Error) -> JsonError {
+            let ocs = match err {
+                DatabaseError(kind, infos) => match kind {
+                    DatabaseErrorKind::UniqueViolation => (
+                        column_from_database_error_infos(infos),
+                        String::from("already exists"),
+                        Status::UnprocessableEntity,
+                    ),
+                    DatabaseErrorKind::ForeignKeyViolation => (
+                        column_from_database_error_infos(infos),
+                        String::from("violates foreign key"),
+                        Status::UnprocessableEntity,
+                    ),
+                    _ => (
+                        Some(String::from("Database error: ")),
+                        format!("{:?}", err),
+                        Status::InternalServerError,
+                    ),
+                },
+                NotFound => (None, String::from("Not found"), Status::NotFound),
+                err => (
+                    Some(String::from("Database error: ")),
+                    format!("{:?}", err),
+                    Status::InternalServerError,
+                ),
+            };
+
+            let mut error = vec![];
+
+            if let Some(origin) = ocs.0 {
+                error.push(origin);
             }
+            error.push(ocs.1);
+
+            JsonError::new(ocs.2, &error.join(" "))
         }
-        return Some(origin);
     }
-    None
+
+    fn column_from_database_error_infos(
+        infos: &Box<DatabaseErrorInformation + Send + Sync>,
+    ) -> Option<String> {
+        if let Some(column) = infos.column_name() {
+            return Some(String::from(column));
+        } else if let Some(constraint) = infos.constraint_name() {
+            let mut origin = String::from(constraint);
+
+            if let Some(table_name) = infos.table_name() {
+                if let Ok(regex) = Regex::new(&format!(r"{}_(.+)_key", table_name)) {
+                    origin = String::from(regex.replace(constraint, "$1"));
+                }
+            }
+            return Some(origin);
+        }
+        None
+    }
 }
 
-use hyper::rt::Future;
-use hyper::rt::Stream;
+mod reqwest {
+    use super::*;
 
-impl<'a> From<hyper::Response<hyper::Body>> for JsonError {
-    fn from(mut resp: hyper::Response<hyper::Body>) -> JsonError {
-        let status_int = resp.status().as_str().parse().unwrap();
-        let status = Status::new(status_int, "");
-        let body_str = resp
-            .body_mut()
-            .concat2()
-            .map(|chunk| {
-                let v = chunk.to_vec();
+    #[derive(Deserialize)]
+    struct ApiError {
+        error: String,
+    }
 
-                String::from_utf8_lossy(&v).to_string()
-            })
-            .wait()
-            .expect("Could not read response body");
+    fn parse_body(body: &str) -> Result<ApiError, serde_json::Error> {
+        serde_json::from_str(body)
+    }
 
-        JsonError::new(status, &body_str)
+    impl<'a> From<::reqwest::Response> for JsonError {
+        fn from(mut resp: ::reqwest::Response) -> JsonError {
+            let status_int = resp.status().as_u16();
+            let status = Status::new(status_int, "");
+            let body = resp.text().expect("Could not read response body");
+
+            match parse_body(&body) {
+                Ok(api_err) => JsonError::new(status, &api_err.error),
+                Err(_) => JsonError::new(status, &body),
+            }
+        }
     }
 }
