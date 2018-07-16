@@ -124,3 +124,25 @@ fn column_from_database_error_infos(
     }
     None
 }
+
+use hyper::rt::Future;
+use hyper::rt::Stream;
+
+impl<'a> From<hyper::Response<hyper::Body>> for JsonError {
+    fn from(mut resp: hyper::Response<hyper::Body>) -> JsonError {
+        let status_int = resp.status().as_str().parse().unwrap();
+        let status = Status::new(status_int, "");
+        let body_str = resp
+            .body_mut()
+            .concat2()
+            .map(|chunk| {
+                let v = chunk.to_vec();
+
+                String::from_utf8_lossy(&v).to_string()
+            })
+            .wait()
+            .expect("Could not read response body");
+
+        JsonError::new(status, &body_str)
+    }
+}
