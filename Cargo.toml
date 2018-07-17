@@ -16,9 +16,5 @@ serde_json = "1.0.22"
 serde_derive = "1.0.70"
 reqwest = { version = "0.8.6", optional = true }
 
-[features]
-diesel-support = ["diesel"]
-reqwest-support = ["reqwest"]
-
 [package.metadata.docs.rs]
-features = ["diesel_support", "reqwest_support"]
+features = ["diesel", "reqwest"]
