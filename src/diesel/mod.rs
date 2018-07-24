@@ -45,6 +45,14 @@ impl<'b> From<&'b ::diesel_crate::result::Error> for JsonError {
     }
 }
 
+impl<'b> From<&'b ::diesel_crate::result::Error> for JsonErrors {
+    fn from(err: &'b ::diesel_crate::result::Error) -> JsonErrors {
+        let json_error: JsonError = err.into();
+
+        json_error.into()
+    }
+}
+
 fn column_from_database_error_infos(
     infos: &Box<DatabaseErrorInformation + Send + Sync>,
 ) -> Option<String> {
