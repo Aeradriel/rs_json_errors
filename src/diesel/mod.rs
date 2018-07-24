@@ -4,7 +4,7 @@ use diesel_crate::result::{
 use regex::Regex;
 use rocket::http::Status;
 
-use json_errors::JsonError;
+use json_errors::{JsonError, JsonErrors};
 
 impl<'b> From<&'b ::diesel_crate::result::Error> for JsonError {
     fn from(err: &'b ::diesel_crate::result::Error) -> JsonError {
