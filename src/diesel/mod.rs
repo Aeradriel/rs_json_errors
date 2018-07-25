@@ -6,10 +6,10 @@ use rocket::http::Status;
 
 use json_errors::{JsonError, JsonErrors};
 
-impl<'b> From<&'b ::diesel_crate::result::Error> for JsonError {
-    fn from(err: &'b ::diesel_crate::result::Error) -> JsonError {
+impl From<::diesel_crate::result::Error> for JsonError {
+    fn from(err: ::diesel_crate::result::Error) -> JsonError {
         let ocs = match err {
-            DatabaseError(kind, infos) => match kind {
+            DatabaseError(kind, ref infos) => match kind {
                 DatabaseErrorKind::UniqueViolation => (
                     column_from_database_error_infos(infos),
                     String::from("already exists"),
@@ -45,8 +45,8 @@ impl<'b> From<&'b ::diesel_crate::result::Error> for JsonError {
     }
 }
 
-impl<'b> From<&'b ::diesel_crate::result::Error> for JsonErrors {
-    fn from(err: &'b ::diesel_crate::result::Error) -> JsonErrors {
+impl From<::diesel_crate::result::Error> for JsonErrors {
+    fn from(err: ::diesel_crate::result::Error) -> JsonErrors {
         let json_error: JsonError = err.into();
 
         json_error.into()
