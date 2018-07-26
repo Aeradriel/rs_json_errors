@@ -32,9 +32,9 @@ impl<'r> Responder<'r> for JsonErrors {
 
 #[derive(Debug, PartialEq)]
 pub struct JsonError {
-    status: Status,
-    description: String,
-    body: Value,
+    pub status: Status,
+    pub description: String,
+    pub body: Value,
 }
 
 impl JsonError {
