@@ -1,5 +1,3 @@
-#![feature(extern_prelude)]
-
 #[cfg(feature = "diesel")]
 extern crate diesel as diesel_crate;
 extern crate regex;
@@ -18,3 +16,5 @@ pub mod diesel;
 pub mod json_errors;
 #[cfg(feature = "reqwest")]
 pub mod reqwest;
+
+pub use json_errors::*;
