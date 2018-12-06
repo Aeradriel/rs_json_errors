@@ -4,6 +4,7 @@ use rocket::request::Request;
 use rocket::response::{self, Responder};
 use rocket_contrib::json::Json;
 use serde_json::Value;
+use std::fmt;
 
 #[derive(Debug, PartialEq)]
 pub struct JsonErrors(pub Vec<JsonError>, pub Status);
@@ -61,5 +62,23 @@ impl<'r> Responder<'r> for JsonError {
         res.set_status(self.status);
         res.set_header(ContentType::JSON);
         Ok(res)
+    }
+}
+
+impl fmt::Display for JsonError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.description)
+    }
+}
+
+impl fmt::Display for JsonErrors {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let res = &self
+            .0
+            .iter()
+            .map(|e| &e.description as &str)
+            .collect::<Vec<&str>>()
+            .join(", ");
+        write!(f, "{}", res)
     }
 }
