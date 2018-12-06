@@ -1,10 +1,10 @@
 #[cfg(feature = "diesel")]
 extern crate diesel as diesel_crate;
 extern crate regex;
-extern crate rocket;
-extern crate rocket_contrib;
 #[cfg(feature = "reqwest")]
 extern crate reqwest as reqwest_crate;
+extern crate rocket;
+extern crate rocket_contrib;
 #[macro_use]
 extern crate serde_json;
 #[cfg(feature = "reqwest")]
