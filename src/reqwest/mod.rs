@@ -1,6 +1,6 @@
 use rocket::http::Status;
 
-use crate::json_errors::JsonError;
+use crate::json_errors::{JsonError, JsonErrors};
 
 #[derive(Deserialize)]
 struct ApiError {
@@ -24,6 +24,14 @@ impl<'a> From<::reqwest_crate::Response> for JsonError {
     }
 }
 
+impl From<::reqwest_crate::Response> for JsonErrors {
+    fn from(err: ::reqwest_crate::Response) -> JsonErrors {
+        let json_error: JsonError = err.into();
+
+        json_error.into()
+    }
+}
+
 impl<'a> From<::reqwest_crate::Error> for JsonError {
     fn from(err: ::reqwest_crate::Error) -> JsonError {
         let status = if let Some(status) = err.status() {
@@ -38,5 +46,13 @@ impl<'a> From<::reqwest_crate::Error> for JsonError {
         } else {
             JsonError::new(status, "Unknown error")
         }
+    }
+}
+
+impl From<::reqwest_crate::Error> for JsonErrors {
+    fn from(err: ::reqwest_crate::Error) -> JsonErrors {
+        let json_error: JsonError = err.into();
+
+        json_error.into()
     }
 }
