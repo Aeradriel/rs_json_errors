@@ -1,6 +1,6 @@
 use rocket::http::Status;
 
-use json_errors::JsonError;
+use crate::json_errors::JsonError;
 
 #[derive(Deserialize)]
 struct ApiError {
@@ -20,6 +20,23 @@ impl<'a> From<::reqwest_crate::Response> for JsonError {
         match parse_body(&body) {
             Ok(api_err) => JsonError::new(status, &api_err.error),
             Err(_) => JsonError::new(status, &body),
+        }
+    }
+}
+
+impl<'a> From<::reqwest_crate::Error> for JsonError {
+    fn from(err: ::reqwest_crate::Error) -> JsonError {
+        let status = if let Some(status) = err.status() {
+            status.as_u16()
+        } else {
+            500
+        };
+        let status = Status::new(status, "");
+
+        if err.is_serialization() {
+            JsonError::new(status, "Serialization error")
+        } else {
+            JsonError::new(status, "Unknown error")
         }
     }
 }
