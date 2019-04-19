@@ -39,7 +39,7 @@ pub struct JsonError {
 }
 
 impl JsonError {
-    pub fn new(status: Status, description: &str) -> Self {
+    pub fn from_status(status: Status, description: &str) -> Self {
         JsonError {
             status,
             description: description.to_string(),
@@ -47,9 +47,9 @@ impl JsonError {
         }
     }
 
-    pub fn from_numeric_status(status: u16, description: &'static str) -> Self {
+    pub fn new(status: u16, description: &str) -> Self {
         JsonError {
-            status: Status::new(status, description),
+            status: Status::new(status, ""),
             description: description.to_string(),
             body: json!({ "error": description.to_string() }),
         }
