@@ -42,7 +42,15 @@ impl JsonError {
     pub fn new(status: Status, description: &str) -> Self {
         JsonError {
             status,
-            description: String::from(description),
+            description: description.to_string(),
+            body: json!({ "error": description.to_string() }),
+        }
+    }
+
+    pub fn from_numeric_status(status: u16, description: &'static str) -> Self {
+        JsonError {
+            status: Status::new(status, description),
+            description: description.to_string(),
             body: json!({ "error": description.to_string() }),
         }
     }
