@@ -41,7 +41,7 @@ impl From<::diesel_crate::result::Error> for JsonError {
         }
         error.push(ocs.1);
 
-        JsonError::new(ocs.2, &error.join(" "))
+        JsonError::from_status(ocs.2, &error.join(" "))
     }
 }
 
