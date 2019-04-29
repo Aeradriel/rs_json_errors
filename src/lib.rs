@@ -1,3 +1,16 @@
+//! # JsonErrors
+//!
+//! This crate provides an easy way to handle errors from popular crates and
+//! transform it into a JSON response. It is meant to be used with Rocket
+//!
+//! ## Diesel
+//!
+//! Diesel errors are supported through the `diesel` feature
+//!
+//! ## Reqwet
+//!
+//! Reqwest errors are supported through the `reqwest` feature
+
 #[cfg(feature = "diesel")]
 extern crate diesel as diesel_crate;
 #[cfg(feature = "reqwest")]
