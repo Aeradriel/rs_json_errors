@@ -1,3 +1,4 @@
+use log::error;
 use rocket::http::ContentType;
 use rocket::http::Status;
 use rocket::request::Request;
@@ -48,6 +49,7 @@ impl JsonError {
     }
 
     pub fn new(status: u16, description: &str) -> Self {
+        error!("JsonError created: {}", description);
         JsonError {
             status: Status::new(status, ""),
             description: description.to_string(),
