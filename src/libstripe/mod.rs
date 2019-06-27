@@ -22,7 +22,10 @@ impl From<Error> for JsonError {
                 JsonError::new(422, &err_string)
             }
             Error::Http(reqwest_err) => reqwest_err.into(),
-            _ => JsonError::new(500, &"Unknown Stripe error"),
+            _ => {
+                debug!("Could not convert following stripe error: {:?}", err);
+                JsonError::new(500, &"Unknown Stripe error")
+            }
         }
     }
 }
