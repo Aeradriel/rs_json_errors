@@ -38,7 +38,7 @@ impl<'a> From<::reqwest_crate::Error> for JsonError {
         };
 
         if err.is_serialization() {
-            JsonError::new(status, "Serialization error: {:?}", err)
+            JsonError::new(status, &format!("Serialization error: {:?}", err))
         } else {
             JsonError::new(status, &format!("Unknown error: {}", err))
         }
