@@ -15,6 +15,8 @@
 //!
 //! Errors from the stripe crate are supported through the `libstripe` feature
 
+#![feature(try_trait)]
+
 #[cfg(feature = "diesel")]
 extern crate diesel as diesel_crate;
 #[cfg(feature = "libstripe")]
@@ -32,6 +34,7 @@ pub mod diesel;
 pub mod json_errors;
 #[cfg(feature = "libstripe")]
 pub mod libstripe;
+pub mod none_error;
 #[cfg(any(feature = "reqwest", feature = "libstripe"))]
 pub mod reqwest;
 
