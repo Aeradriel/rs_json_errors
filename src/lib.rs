@@ -21,8 +21,8 @@
 extern crate diesel as diesel_crate;
 #[cfg(any(feature = "reqwest", feature = "stripe_api"))]
 extern crate reqwest as reqwest_crate;
-#[cfg(feature = "stripe_api")]
-extern crate stripe_api as stripe_api_crate;
+#[cfg(feature = "stripe")]
+extern crate stripe as stripe_crate;
 #[macro_use]
 extern crate serde_json;
 #[cfg(feature = "reqwest")]
@@ -35,7 +35,7 @@ pub mod json_errors;
 pub mod none_error;
 #[cfg(any(feature = "reqwest", feature = "stripe_api"))]
 pub mod reqwest;
-#[cfg(feature = "stripe_api")]
-pub mod stripe_api;
+#[cfg(feature = "stripe")]
+pub mod stripe;
 
 pub use crate::json_errors::*;

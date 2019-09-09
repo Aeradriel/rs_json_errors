@@ -1,5 +1,5 @@
 use log::debug;
-use stripe_api_crate::error::Error;
+use srtipe_crate::error::Error;
 
 use crate::{JsonError, JsonErrors};
 
