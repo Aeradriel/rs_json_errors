@@ -2,7 +2,7 @@
 name = "json_errors"
 description = "Transforms popular crates' errors into JSON errors. Aimed to be used with Rocket."
 license = "MIT"
-version = "0.5.1"
+version = "0.5.2"
 authors = ["Thibaut Roche <thibaut.roche.perso@gmail.com>"]
 repository = "https://github.com/Aeradriel/rs_json_errors.git"
 edition = "2018"

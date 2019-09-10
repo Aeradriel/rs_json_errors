@@ -54,7 +54,7 @@ impl From<::diesel_crate::result::Error> for JsonErrors {
 }
 
 fn column_from_database_error_infos(
-    infos: &Box<DatabaseErrorInformation + Send + Sync>,
+    infos: &Box<dyn DatabaseErrorInformation + Send + Sync>,
 ) -> Option<String> {
     if let Some(column) = infos.column_name() {
         return Some(String::from(column));
