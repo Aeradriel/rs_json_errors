@@ -15,8 +15,6 @@
 //!
 //! Errors from the stripe crate are supported through the `stripe_api` feature
 
-#![feature(try_trait)]
-
 #[cfg(feature = "diesel")]
 extern crate diesel as diesel_crate;
 #[cfg(any(feature = "reqwest", feature = "stripe_api"))]
@@ -32,7 +30,6 @@ extern crate serde_derive;
 #[cfg(feature = "diesel")]
 pub mod diesel;
 pub mod json_errors;
-pub mod none_error;
 #[cfg(any(feature = "reqwest", feature = "stripe_api"))]
 pub mod reqwest;
 #[cfg(feature = "stripe")]
